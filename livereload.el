@@ -199,6 +199,7 @@
 ;;;
 
 (defvar livereload--calculated-targets '())
+(make-variable-buffer-local 'livereload--calculated-targets)
 
 (defvar livereload-potential-targets
   'livereload-default-potential-targets
@@ -266,7 +267,7 @@ call `livereload-notify' immediately, or somehow schedule a call
 to it in the future.")
 
 (defun livereload--notify-maybe ()
-  (let* ((livereload--calculated-targets
+  (let* ((calculated
           (cl-loop for conn in livereload--connections
                    for url = (process-get conn 'livereload--url)
                    for targets = (and url
@@ -276,7 +277,8 @@ to it in the future.")
                                         livereload-potential-targets))
                    when targets
                    collect (list url conn targets))))
-    (cond (livereload--calculated-targets
+    (setq-local livereload--calculated-targets calculated)
+    (cond (calculated
            (let ((hookage (run-hook-with-args-until-success
                            'livereload-notify-hook
                            (mapcar

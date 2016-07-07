@@ -43,7 +43,8 @@
   (livereload--message "%s being told hello!" connection)
   (websocket-send-text (process-get connection :websocket)
                        (json-encode '((command . "hello")
-                                      (protocols . ["http://livereload.com/protocols/connection-check-1" "http://livereload.com/protocols/official-7"])
+                                      (protocols . ["http://livereload.com/protocols/connection-check-1"
+                                                    "http://livereload.com/protocols/official-7"])
                                       (serverName . "Emacs livereload"))))
   (push connection livereload--connections))
 
@@ -70,13 +71,9 @@
   (livereload--message "%s client says hello: %s!" connection message)
   (let* ((client-protocols (alist-get 'protocols message))
          (preferred (aref client-protocols (1- (length client-protocols)))))
-    (when (and preferred
-               (string-match "connection-check-1" preferred))
-      (livereload--message "%s connection-check left to linger!" connection message)
-      (process-put connection 'livereload--connection-check message)
-      ;; (livereload--message "%s connection-check killed!" connection message)
-      ;; (livereload-close connection)
-      )))
+    (process-put connection 'livereload--hello message)
+    (process-put connection 'livereload--timestamp-string (current-time-string))
+    (livereload--message "%s client prefers %s" connection preferred)))
 
 (cl-defmethod livereload--event ((_command (eql :info)) message connection)
   (livereload--message "%s sends info: %s!" connection message)
@@ -93,6 +90,44 @@
                         livereload--connections))
          (chosen (ido-completing-read "Which server? " names nil t)))
     (get-text-property 0 'livereload--connection chosen)))
+
+(define-derived-mode livereload--connection-list-mode tabulated-list-mode
+  "Livereload connections"
+  "Livereload mode for listing connections
+
+\\{livereload--connection-list-mode-map}"
+  (set (make-local-variable 'tabulated-list-format)
+       `[("Url" 50 t) ("Agent" 24) ("Close?" 10) ("Port" 24) ("Time" 24 t)])
+  (add-hook 'tabulated-list-revert-hook
+            'livereload--connection-list-recompute t t)
+  (tabulated-list-init-header))
+
+(defun livereload--connection-list-recompute ()
+  (set (make-local-variable 'tabulated-list-entries)
+       (mapcar
+        #'(lambda (connection)
+            (list connection
+                  `[,(or (process-get connection 'livereload--url) "(not set yet)")
+                    "Unknown agent"
+                    (,"Close"
+                     action
+                     ,#'(lambda (_button)
+                          (livereload-close connection)))
+                    ,(pp-to-string (car (process-contact connection)))
+                    ,(or (process-get connection 'livereload--timestamp-string) "(unknown time)")
+                    ]))
+        livereload--connections)))
+
+(defun livereload-list-connections ()
+  (interactive)
+  (with-current-buffer
+      (get-buffer-create "*livereload connections*")
+    (let  ((inhibit-read-only t)
+           (standard-output (current-buffer)))
+      (erase-buffer)
+      (livereload--connection-list-mode)
+      (revert-buffer)
+      (pop-to-buffer (current-buffer)))))
 
 (defun livereload-close (connection)
   (interactive

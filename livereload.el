@@ -100,10 +100,11 @@
   (websocket-close (process-get connection :websocket)))
 
 (defun livereload--send-livereload-js-file (process)
-  (let ((slurped (with-temp-buffer
-                   (insert-file-contents-literally
-                    (concat livereload--package-directory "/livereload.js"))
+  (let* ((file (concat livereload--package-directory "/livereload.js"))
+         (slurped (with-temp-buffer
+                   (insert-file-contents-literally file)
                    (buffer-string))))
+    (livereload--message "%s sending %s " process file)
     (process-send-string
      process
      (concat "HTTP/1.1 200 OK\r\n"
@@ -129,7 +130,7 @@
     (set-process-sentinel
      process
      (lambda (process change)
-       (livereload--message "%s (unjacked to HTTP) saying bye bye" process change)
+       (livereload--message "%s (unjacked to HTTP) closing, since %s" process change)
        (set-process-sentinel process nil)
        (delete-process process)))
     (livereload--send-livereload-js-file process)))

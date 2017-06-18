@@ -241,9 +241,9 @@
   'livereload-default-potential-targets
   "Identifies target URLs based on visited URL and current buffer.
 
-Can be a list of strings, the symbol t, or a symbol denoting a
-function of one argument producing one of the two preceding
-types.
+Can be a list of strings, the symbol t, or a symbol or lambda
+denoting a function of one argument producing one of the two
+preceding types.
 
 A list of strings identifies target URLs that livereload clients
 connected to Emacs are told to reload. If it is empty (or nil)
@@ -302,13 +302,19 @@ abort the notification process, for eventually calling
 call `livereload-notify' immediately, or somehow schedule a call
 to it in the future.")
 
+(defun lambdap (list)
+  "Returns t if LIST is a list starting with LAMBDA"
+  (and (listp list)
+       (eq (car list) 'lambda)))
+
 (defun livereload--notify-maybe ()
   (let* ((calculated
           (cl-loop for conn in livereload--connections
                    for url = (process-get conn 'livereload--url)
                    for targets = (and url
                                       (if (and (not (eq t livereload-potential-targets))
-                                               (symbolp livereload-potential-targets))
+                                               (or (symbolp livereload-potential-targets)
+                                                   (lambdap livereload-potential-targets)))
                                           (funcall livereload-potential-targets url)
                                         livereload-potential-targets))
                    when targets

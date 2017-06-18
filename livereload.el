@@ -302,11 +302,6 @@ abort the notification process, for eventually calling
 call `livereload-notify' immediately, or somehow schedule a call
 to it in the future.")
 
-(defun lambdap (list)
-  "Returns t if LIST is a list starting with LAMBDA"
-  (and (listp list)
-       (eq (car list) 'lambda)))
-
 (defun livereload--notify-maybe ()
   (let* ((calculated
           (cl-loop for conn in livereload--connections
@@ -314,7 +309,7 @@ to it in the future.")
                    for targets = (and url
                                       (if (and (not (eq t livereload-potential-targets))
                                                (or (symbolp livereload-potential-targets)
-                                                   (lambdap livereload-potential-targets)))
+                                                   (functionp livereload-potential-targets)))
                                           (funcall livereload-potential-targets url)
                                         livereload-potential-targets))
                    when targets

@@ -349,7 +349,7 @@ to it in the future.")
                            url)
              buffer-file-name
              (save-match-data
-               (string-match "\\(css\\|\\js\\|html?\\)" (file-name-extension buffer-file-name))))
+               (string-match "\\(css\\|\\js\\|\\html?\\)" (file-name-extension buffer-file-name))))
     (let* ((_address (match-string 1 url))
            (path (match-string 2 url))
            (project-dir (and buffer-file-name
@@ -358,7 +358,7 @@ to it in the future.")
                           (substring buffer-file-name
                                      (cl-mismatch project-dir buffer-file-name)))))
       (cond ((and relative
-                  (string-match "\\(css\\|\\js\\)" (file-name-extension relative)))
+                  (string-match "\\(css\\|\\js\\|\\html\\)" (file-name-extension relative)))
              (list relative))
             ((and relative
                   (string-match "index.html?" (file-name-nondirectory relative)))

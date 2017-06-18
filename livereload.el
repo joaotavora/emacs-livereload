@@ -1,5 +1,8 @@
 ;;; livereload.el --- Livereload server for Emacs    -*- lexical-binding: t; -*-
 
+;;; Version: 0
+;;; Package-Requires: ((emacs "25"))
+
 ;; Copyright (C) 2015  João Távora
 
 ;; Author: João Távora <joaotavora@gmail.com>
@@ -20,7 +23,8 @@
 
 ;;; Commentary:
 
-;; 
+;; Instructs browsers with the LiveReload extension to reload their tabs
+;; displaying the file which was just saved.
 
 ;;; Code:
 

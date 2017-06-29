@@ -1,7 +1,7 @@
 ;;; livereload.el --- Livereload server     -*- lexical-binding: t; -*-
 
 ;;; Version: 0
-;;; Package-Requires: ((emacs "25"))
+;;; Package-Requires: ((emacs "25") (websocket "1.8"))
 
 ;; Copyright (C) 2015  João Távora
 

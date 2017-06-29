@@ -1,4 +1,4 @@
-;;; livereload.el --- Livereload server for Emacs    -*- lexical-binding: t; -*-
+;;; livereload.el --- Livereload server     -*- lexical-binding: t; -*-
 
 ;;; Version: 0
 ;;; Package-Requires: ((emacs "25"))
